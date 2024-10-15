@@ -1,0 +1,46 @@
+name: .NET Core CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: MyDemoApp.csproj  # Adjust if you have a solution
+      Test_Project_Path: MyDemoApp.Tests/MyDemoApp.Tests.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test ${{ env.Test_Project_Path }} --configuration ${{ matrix.configuration }}
+
+    # Restore the application
+    - name: Restore the application
+      run: dotnet restore
+
+    # Build the application
+    - name: Build the application
+      run: dotnet build ${{ env.Solution_Name }} --configuration ${{ matrix.configuration }}
+
+    # (Optional) You can add packaging steps here if necessary
